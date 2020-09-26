@@ -9,10 +9,10 @@ const app = express();
 
 app.use(express.json());
 
-app.use('/companies', companiesRoutes);
-
 // add logging system
 app.use(morgan('tiny'));
+
+app.use('/companies', companiesRoutes);
 
 /** 404 handler */
 
