@@ -13,7 +13,7 @@
 			"company_handle": "test1"
 		}
 	],
-	"required": [ "title", "salary" ],
+	"required": [ "title", "salary", "company_handle" ],
 	"properties": {
 		"title": {
 			"$id": "#/properties/title",

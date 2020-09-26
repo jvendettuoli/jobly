@@ -66,7 +66,7 @@ class Job {
 				`INSERT INTO jobs
                 (title, salary, equity, company_handle)
                 VALUES ($1, $2, $3, $4)
-                RETURNING title, salary, equity, company_handle, date_posted`,
+                RETURNING id, title, salary, equity, company_handle, date_posted`,
 				[ data.title, data.salary, data.equity, data.company_handle ]
 			);
 			return result.rows[0];
@@ -75,36 +75,53 @@ class Job {
 		}
 	}
 
-	/** Find a Job in database by handle and returns that Job data*/
-	static async find(handle) {
+	/** Find a Job in database by id and returns that Job data*/
+	static async find(id) {
 		console.debug('Class Job find - Start');
 
 		const result = await db.query(
-			`SELECT handle, name, num_employees, description, logo_url FROM companies
-                WHERE handle = $1`,
-			[ handle ]
+			`SELECT id, title, salary, equity, date_posted, c.handle, c.name, c.num_employees, c.description, c.logo_url FROM jobs
+			JOIN companies AS c ON jobs.company_handle = c.handle
+                WHERE id = $1`,
+			[ id ]
 		);
 
-		// Throw error if handle is not found
+		// Throw error if id is not found
 		if (result.rows.length === 0) {
-			throw new ExpressError(`No Job found with handle ${handle}`, 400);
+			throw new ExpressError(`No Job found with id ${id}`, 400);
 		}
-		return result.rows[0];
+
+		const job = {
+			id          : result.rows[0].id,
+			title       : result.rows[0].title,
+			salary      : result.rows[0].salary,
+			equity      : result.rows[0].equity,
+			date_posted : result.rows[0].date_posted,
+			company     : {
+				handle        : result.rows[0].handle,
+				name          : result.rows[0].name,
+				num_employees : result.rows[0].num_employees,
+				description   : result.rows[0].description,
+				logo_url      : result.rows[0].logo_url
+			}
+		};
+
+		return job;
 	}
 
-	/** Find a Job in database by handle, update it with provided 
+	/** Find a Job in database by id, update it with provided 
      * data returns that Job data*/
-	static async update(handle, data) {
+	static async update(id, data) {
 		console.debug('Class Job update - Start');
 
-		const { query, values } = sqlForPartialUpdate('companies', data, 'handle', handle);
+		const { query, values } = sqlForPartialUpdate('companies', data, 'id', id);
 
 		try {
 			const result = await db.query(query, values);
 
-			// Throw error if handle is not found
+			// Throw error if id is not found
 			if (result.rows.length === 0) {
-				throw new ExpressError(`No Job found with handle ${handle}`, 400);
+				throw new ExpressError(`No Job found with id ${id}`, 400);
 			}
 			return result.rows[0];
 		} catch (e) {

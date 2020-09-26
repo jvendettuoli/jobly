@@ -17,8 +17,9 @@ const router = new express.Router();
  */
 
 router.get('/', async function(req, res, next) {
+	console.debug('Routes jobs GET / - Start');
+
 	try {
-		console.debug('Routes jobs GET / - Start');
 		const jobs = await Job.all(req.query);
 		return res.json({ jobs });
 	} catch (e) {
@@ -30,13 +31,13 @@ router.get('/', async function(req, res, next) {
  *
  *  Takes JSON object {title, salary, equity, company_handle}
  *
- * => {job: {title, salary, equity, company_handle, date_posted}
+ * => {job: {id,title, salary, equity, company_handle, date_posted}}
  */
 
 router.post('/', async function(req, res, next) {
-	try {
-		console.debug('Routes jobs POST / - Start');
+	console.debug('Routes jobs POST / - Start');
 
+	try {
 		const validation = validate(req.body, jobNewSchema);
 		if (!validation.valid) {
 			throw new ExpressError(validation.errors.map((e) => e.stack), 400);
@@ -48,52 +49,57 @@ router.post('/', async function(req, res, next) {
 	}
 });
 
-// /**GET /companies:handle
-//  *
-//  *  Finds a company by its handle
-//  *
-//  * => {company: {handle, name, num_employees, description, logo_url}
-//  */
+/**GET /jobs:id
+ *
+ *  Finds a job by its id
+ *
+ * => {job: {id, title, salary, equity, date_posted, company:{companyData}}}
+ */
 
-// router.get('/:handle', async function(req, res, next) {
-// 	try {
-// 		console.debug('Routes companies GET /:handle - Start');
-// 		const company = await Company.find(req.params.handle);
-// 		if (company instanceof ExpressError) {
-// 			return next(company);
-// 		}
-// 		return res.json({ company });
-// 	} catch (e) {
-// 		return next(e);
-// 	}
-// });
+router.get('/:id', async function(req, res, next) {
+	console.debug('Routes jobs GET /:id - Start');
 
-// /**PATCH /companies:handle
-//  *
-//  *  Finds a company by its handle and update some of its data
-//  *  Takes JSON object with any of the keys
-//  *  {name, num_employees, description, logo_url}
-//  *
-//  * => {company: {handle, name, num_employees, description, logo_url}
-//  */
+	try {
+		if (!Number.isInteger(+req.params.id)) {
+			throw new ExpressError('Id must be an integer.', 400);
+		}
+		const job = await Job.find(req.params.id);
+		if (job instanceof ExpressError) {
+			return next(job);
+		}
+		return res.json({ job });
+	} catch (e) {
+		return next(e);
+	}
+});
 
-// router.patch('/:handle', async function(req, res, next) {
-// 	try {
-// 		const validation = validate(req.body, companyNewSchema);
-// 		if (!validation.valid) {
-// 			throw new ExpressError(validation.errors.map((e) => e.stack), 400);
-// 		}
+/**PATCH /jobs:id
+ *
+ *  Finds a job by its id and update some of its data
+ *  Takes JSON object with any of the keys
+ *  {title, salary, equity,}
+ *
+ * => {job:{id, title, salary, equity, date_posted, company:{companyData}}}
+ */
 
-// 		console.debug('Routes companies GET /:handle - Start');
-// 		const company = await Company.update(req.params.handle, req.body);
-// 		if (company instanceof ExpressError) {
-// 			return next(company);
-// 		}
-// 		return res.json({ company });
-// 	} catch (e) {
-// 		return next(e);
-// 	}
-// });
+router.patch('/:id', async function(req, res, next) {
+	console.debug('Routes jobs GET /:id - Start');
+
+	try {
+		const validation = validate(req.body, jobNewSchema);
+		if (!validation.valid) {
+			throw new ExpressError(validation.errors.map((e) => e.stack), 400);
+		}
+
+		const job = await Job.update(req.params.id, req.body);
+		if (job instanceof ExpressError) {
+			return next(job);
+		}
+		return res.json({ job });
+	} catch (e) {
+		return next(e);
+	}
+});
 
 // /**DELETE /companies:handle
 //  *
