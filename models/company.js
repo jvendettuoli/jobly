@@ -22,12 +22,13 @@ class Company {
 		// to max_employees
 		if (+queries.min_employees >= +queries.max_employees) {
 			throw new ExpressError(
-				'Query parameters are invalid. Minimum number of emloyees must be less than maximum number of employees.',
+				'Query parameters are invalid. Minimum number of employees must be less than maximum number of employees.',
 				400
 			);
 		}
 		let queryIdx = 1;
 		let whereStatements = [];
+		let queryValues = [];
 		let baseQuery = `SELECT handle, name
                 FROM companies`;
 
@@ -36,14 +37,17 @@ class Company {
 		if (queries.search) {
 			whereStatements.push(`to_tsvector(name) @@ to_tsquery($${queryIdx})`);
 			queryIdx += 1;
+			queryValues.push(queries.search);
 		}
 		if (queries.min_employees) {
 			whereStatements.push(`num_employees >= $${queryIdx}`);
 			queryIdx += 1;
+			queryValues.push(queries.min_employees);
 		}
 		if (queries.max_employees) {
 			whereStatements.push(`num_employees <= $${queryIdx}`);
 			queryIdx += 1;
+			queryValues.push(queries.max_employees);
 		}
 
 		let finalQuery = '';
@@ -51,7 +55,7 @@ class Company {
 			finalQuery = baseQuery.concat(' WHERE ', whereStatements.join(' AND '));
 		}
 
-		const results = await db.query(finalQuery ? finalQuery : baseQuery, Object.values(queries));
+		const results = await db.query(finalQuery ? finalQuery : baseQuery, queryValues);
 		return results.rows;
 	}
 
