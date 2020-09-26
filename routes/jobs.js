@@ -26,30 +26,27 @@ router.get('/', async function(req, res, next) {
 	}
 });
 
-// /**POST /companies
-//  *
-//  *  Takes JSON object {name, num_employees, description, logo_url}
-//  *
-//  * => {company: {handle, name, num_employees, description, logo_url}
-//  */
+/**POST /jobs
+ *
+ *  Takes JSON object {title, salary, equity, company_handle}
+ *
+ * => {job: {title, salary, equity, company_handle, date_posted}
+ */
 
-// router.post('/', async function(req, res, next) {
-// 	try {
-// 		console.debug('Routes companies POST / - Start');
+router.post('/', async function(req, res, next) {
+	try {
+		console.debug('Routes jobs POST / - Start');
 
-// 		const validation = validate(req.body, companyNewSchema);
-// 		if (!validation.valid) {
-// 			throw new ExpressError(validation.errors.map((e) => e.stack), 400);
-// 		}
-// 		const company = await Company.create(req.body);
-// 		return res.status(201).json({ company });
-// 	} catch (e) {
-// 		if (e.code === '23505') {
-// 			throw new ExpressError('Company name already exists.', 400);
-// 		}
-// 		return next(e);
-// 	}
-// });
+		const validation = validate(req.body, jobNewSchema);
+		if (!validation.valid) {
+			throw new ExpressError(validation.errors.map((e) => e.stack), 400);
+		}
+		const job = await Job.create(req.body);
+		return res.status(201).json({ job });
+	} catch (e) {
+		return next(e);
+	}
+});
 
 // /**GET /companies:handle
 //  *

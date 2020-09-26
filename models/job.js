@@ -1,5 +1,4 @@
 /** Job Class */
-const slugify = require('slugify');
 
 const db = require('../db');
 const ExpressError = require('../helpers/expressError');
@@ -54,7 +53,6 @@ class Job {
 		if (whereStatements.length > 0) {
 			finalQuery = baseQuery.concat(' WHERE ', whereStatements.join(' AND '), ' ORDER BY date_posted');
 		}
-		console.log('STATEMENT', finalQuery ? finalQuery : baseQuery, queryValues);
 		const results = await db.query(finalQuery ? finalQuery : baseQuery, queryValues);
 		return results.rows;
 	}
@@ -62,22 +60,17 @@ class Job {
 	/** Create a Job in database and returns that Job data*/
 	static async create(data) {
 		console.debug('Class Job create - Start');
-		const handle = slugify(data.name);
 
 		try {
 			const result = await db.query(
-				`INSERT INTO companies
-                (handle, name, num_employees, description, logo_url)
-                VALUES ($1, $2, $3, $4, $5)
-                RETURNING handle, name, num_employees, description, logo_url`,
-				[ handle, data.name, data.num_employees, data.description, data.logo_url ]
+				`INSERT INTO jobs
+                (title, salary, equity, company_handle)
+                VALUES ($1, $2, $3, $4)
+                RETURNING title, salary, equity, company_handle, date_posted`,
+				[ data.title, data.salary, data.equity, data.company_handle ]
 			);
 			return result.rows[0];
 		} catch (e) {
-			// Throw specific error if duplicate value found
-			if (e.code === '23505') {
-				throw new ExpressError('Job name already exists.', 400);
-			}
 			return e;
 		}
 	}
