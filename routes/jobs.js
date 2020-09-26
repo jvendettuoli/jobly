@@ -86,7 +86,10 @@ router.patch('/:id', async function(req, res, next) {
 	console.debug('Routes jobs GET /:id - Start');
 
 	try {
-		const validation = validate(req.body, jobNewSchema);
+		if (!Number.isInteger(+req.params.id)) {
+			throw new ExpressError('Id must be an integer.', 400);
+		}
+		const validation = validate(req.body, jobUpdateSchema);
 		if (!validation.valid) {
 			throw new ExpressError(validation.errors.map((e) => e.stack), 400);
 		}
@@ -101,26 +104,30 @@ router.patch('/:id', async function(req, res, next) {
 	}
 });
 
-// /**DELETE /companies:handle
-//  *
-//  *  Finds a company by its handle and deletes it
-//  *
-//  * => {message: Company delete}
-//  */
+/**DELETE /jobs:id
+ *
+ *  Finds a job by its id and deletes it
+ *
+ * => {message: job delete}
+ */
 
-// router.delete('/:handle', async function(req, res, next) {
-// 	try {
-// 		console.debug('Routes companies DELETE /:handle - Start');
-// 		const result = await Company.delete(req.params.handle);
-// 		console.log('RESULT', result);
-// 		if (result instanceof ExpressError) {
-// 			console.log('IF ERROR');
-// 			return next(result);
-// 		}
-// 		return res.json({ message: 'Company deleted' });
-// 	} catch (e) {
-// 		return next(e);
-// 	}
-// });
+router.delete('/:id', async function(req, res, next) {
+	console.debug('Routes jobs DELETE /:id - Start');
+
+	try {
+		if (!Number.isInteger(+req.params.id)) {
+			throw new ExpressError('Id must be an integer.', 400);
+		}
+		const result = await Job.delete(req.params.id);
+		console.log('RESULT', result);
+		if (result instanceof ExpressError) {
+			console.log('IF ERROR');
+			return next(result);
+		}
+		return res.json({ message: 'Job deleted' });
+	} catch (e) {
+		return next(e);
+	}
+});
 
 module.exports = router;

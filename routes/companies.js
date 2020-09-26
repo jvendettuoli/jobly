@@ -82,7 +82,7 @@ router.get('/:handle', async function(req, res, next) {
 
 router.patch('/:handle', async function(req, res, next) {
 	try {
-		const validation = validate(req.body, companyNewSchema);
+		const validation = validate(req.body, companyUpdateSchema);
 		if (!validation.valid) {
 			throw new ExpressError(validation.errors.map((e) => e.stack), 400);
 		}

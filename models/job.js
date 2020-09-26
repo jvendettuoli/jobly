@@ -114,7 +114,7 @@ class Job {
 	static async update(id, data) {
 		console.debug('Class Job update - Start');
 
-		const { query, values } = sqlForPartialUpdate('companies', data, 'id', id);
+		const { query, values } = sqlForPartialUpdate('jobs', data, 'id', id);
 
 		try {
 			const result = await db.query(query, values);
@@ -123,28 +123,40 @@ class Job {
 			if (result.rows.length === 0) {
 				throw new ExpressError(`No Job found with id ${id}`, 400);
 			}
-			return result.rows[0];
-		} catch (e) {
-			if (e.code === '23505') {
-				throw new ExpressError('Job name already exists.', 400);
+			let job = result.rows[0];
+
+			const company = await db.query(
+				`SELECT handle, name, num_employees, description, logo_url FROM companies
+					WHERE handle = $1`,
+				[ job.company_handle ]
+			);
+
+			// Throw error if id is not found
+			if (company.rows.length === 0) {
+				throw new ExpressError(`No Company found with id ${job.company_handle}`, 400);
 			}
+			delete job.company_handle;
+			job['company'] = company.rows[0];
+
+			return job;
+		} catch (e) {
 			return e;
 		}
 	}
 
-	/** Find a Job in database by handle and delete it */
-	static async delete(handle) {
+	/** Find a Job in database by id and delete it */
+	static async delete(id) {
 		console.debug('Class Job delete - Start');
 		try {
 			const result = await db.query(
-				`DELETE FROM companies
-                WHERE handle = $1
-                RETURNING handle`,
-				[ handle ]
+				`DELETE FROM jobs
+                WHERE id = $1
+                RETURNING id`,
+				[ id ]
 			);
-			// Throw error if handle is not found
+			// Throw error if id is not found
 			if (result.rows.length === 0) {
-				throw new ExpressError(`No Job found with handle ${handle}`, 400);
+				throw new ExpressError(`No Job found with id ${id}`, 400);
 			}
 		} catch (e) {
 			return e;
