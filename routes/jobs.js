@@ -119,9 +119,7 @@ router.delete('/:id', async function(req, res, next) {
 			throw new ExpressError('Id must be an integer.', 400);
 		}
 		const result = await Job.delete(req.params.id);
-		console.log('RESULT', result);
 		if (result instanceof ExpressError) {
-			console.log('IF ERROR');
 			return next(result);
 		}
 		return res.json({ message: 'Job deleted' });

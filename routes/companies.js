@@ -17,8 +17,9 @@ const router = new express.Router();
  */
 
 router.get('/', async function(req, res, next) {
+	console.debug('Routes companies GET / - Start');
+
 	try {
-		console.debug('Routes companies GET / - Start');
 		const companies = await Company.all(req.query);
 		return res.json({ companies });
 	} catch (e) {
@@ -34,9 +35,9 @@ router.get('/', async function(req, res, next) {
  */
 
 router.post('/', async function(req, res, next) {
-	try {
-		console.debug('Routes companies POST / - Start');
+	console.debug('Routes companies POST / - Start');
 
+	try {
 		const validation = validate(req.body, companyNewSchema);
 		if (!validation.valid) {
 			throw new ExpressError(validation.errors.map((e) => e.stack), 400);
@@ -59,8 +60,9 @@ router.post('/', async function(req, res, next) {
  */
 
 router.get('/:handle', async function(req, res, next) {
+	console.debug('Routes companies GET /:handle - Start');
+
 	try {
-		console.debug('Routes companies GET /:handle - Start');
 		const company = await Company.find(req.params.handle);
 		if (company instanceof ExpressError) {
 			return next(company);
@@ -81,13 +83,14 @@ router.get('/:handle', async function(req, res, next) {
  */
 
 router.patch('/:handle', async function(req, res, next) {
+	console.debug('Routes companies GET /:handle - Start');
+
 	try {
 		const validation = validate(req.body, companyUpdateSchema);
 		if (!validation.valid) {
 			throw new ExpressError(validation.errors.map((e) => e.stack), 400);
 		}
 
-		console.debug('Routes companies GET /:handle - Start');
 		const company = await Company.update(req.params.handle, req.body);
 		if (company instanceof ExpressError) {
 			return next(company);
@@ -106,12 +109,11 @@ router.patch('/:handle', async function(req, res, next) {
  */
 
 router.delete('/:handle', async function(req, res, next) {
+	console.debug('Routes companies DELETE /:handle - Start');
+
 	try {
-		console.debug('Routes companies DELETE /:handle - Start');
 		const result = await Company.delete(req.params.handle);
-		console.log('RESULT', result);
 		if (result instanceof ExpressError) {
-			console.log('IF ERROR');
 			return next(result);
 		}
 		return res.json({ message: 'Company deleted' });

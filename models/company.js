@@ -96,7 +96,17 @@ class Company {
 		if (result.rows.length === 0) {
 			throw new ExpressError(`No company found with handle ${handle}`, 400);
 		}
-		return result.rows[0];
+		let company = result.rows[0];
+		const jobsResults = await db.query(
+			`SELECT id, title, salary, equity, date_posted
+            FROM jobs
+            WHERE company_handle = $1`,
+			[ company.handle ]
+		);
+
+		company['jobs'] = jobsResults.rows.length === 0 ? [ 'No jobs available.' ] : jobsResults.rows[0];
+
+		return company;
 	}
 
 	/** Find a company in database by handle, update it with provided 

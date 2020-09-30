@@ -100,7 +100,14 @@ describe('GET /companies/:handle', async function() {
 		const response = await request(app).get(`/companies/${companyData.handle}`);
 
 		expect(response.statusCode).toBe(200);
-		expect(response.body.company).toEqual(companyData);
+		expect(response.body.company).toEqual({
+			handle        : 'Test-Name',
+			name          : 'Test Name',
+			num_employees : 50,
+			description   : 'Test Description for Test Name',
+			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png',
+			jobs          : [ 'No jobs available.' ]
+		});
 	});
 	test('Invalid handle returns 400', async function() {
 		const response = await request(app).get(`/companies/cacacachoo`);

@@ -1,6 +1,8 @@
 
-DROP TABLE IF EXISTS companies;
-DROP TABLE IF EXISTS jobs;
+DROP TABLE IF EXISTS
+companies, jobs
+CASCADE;
+
 
 CREATE TABLE companies
 (
