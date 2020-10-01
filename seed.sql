@@ -11,3 +11,10 @@ VALUES
     ('Test Manager', 80000, 0.2, 'test1'),
     ('Test Boss', 400000, 0.75, 'test1'),
     ('Test Tech', 40000, 0.1, 'test2');
+
+INSERT INTO users
+    (username, password, first_name, last_name, email, photo_url, is_admin)
+VALUES
+    ('Test User 1', 'Hashed password1', 'Justin', 'Vendettuoli', 'jvend@gmail.com', 'https://www.flaticon.com/svg/static/icons/svg/21/21104.svg', true),
+    ('Test User 2', 'hashed password2', 'Greg', 'Miller', 'gmiller@gmail.com', 'https://www.flaticon.com/svg/static/icons/svg/21/21104.svg', false),
+    ('Test User 3', 'hashed password3', 'Mel', 'Messineo', 'messy@gmail.com', 'https://www.flaticon.com/svg/static/icons/svg/21/21104.svg', false);

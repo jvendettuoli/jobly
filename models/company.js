@@ -6,14 +6,6 @@ const ExpressError = require('../helpers/expressError');
 const sqlForPartialUpdate = require('../helpers/partialUpdate');
 
 class Company {
-	// constructor(handle, name, num_employees, description, logo_url) {
-	// 	this.handle = handle;
-	// 	this.name = name;
-	// 	this.num_employees = num_employees;
-	// 	this.description = description || 'No decription available.';
-	// 	this.logo_url = logo_url;
-	// }
-
 	/** Return all companies in database. queries may contain optional filters */
 	static async all(queries) {
 		console.debug('Class Company all - Start');
