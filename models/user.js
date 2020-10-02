@@ -91,14 +91,19 @@ class User {
 		throw new ExpressError('Invalid Password', 401);
 	}
 
-	/** Find a User in database by username and returns that User data*/
+	/** Find a User in database by username and returns that User data
+	 * Also returns any applications created by the user and associated
+	 * data
+	*/
 	static async find(username) {
 		console.debug('Class User find - Start');
 
 		const result = await db.query(
-			`SELECT username, first_name, last_name, email, photo_url
-			FROM users
-			WHERE username = $1`,
+			`SELECT u.username, u.first_name, u.last_name, u.email, u.photo_url, json_agg(json_build_object('id',a.job_id, 'state', a.state, 'created_at',a.created_at)) AS jobs
+			FROM users AS u
+			LEFT JOIN applications AS a ON u.username = a.username
+			WHERE u.username = $1
+			GROUP BY u.username`,
 			[ username ]
 		);
 
@@ -106,6 +111,12 @@ class User {
 		if (result.rows.length === 0) {
 			throw new ExpressError(`No User found with username ${username}`, 400);
 		}
+		const user = result.rows[0];
+
+		if (user.jobs[0].id === null) {
+			user.jobs[0] = 'No applications';
+		}
+
 		return result.rows[0];
 	}
 

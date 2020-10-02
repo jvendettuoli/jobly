@@ -58,7 +58,7 @@ router.post('/', async function(req, res, next) {
  *
  *  Finds a user by username
  *
- * => {user: {username, first_name, last_name, email, photo_url, is_admin}}
+ * => {user: {username, first_name, last_name, email, photo_url, jobs:{id, state, created_at}}}
  */
 
 router.get('/:username', async function(req, res, next) {

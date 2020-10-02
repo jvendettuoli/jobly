@@ -1,6 +1,6 @@
 
 DROP TABLE IF EXISTS
-companies, users, jobs
+companies, users, jobs, applications
 CASCADE;
 
 

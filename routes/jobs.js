@@ -50,6 +50,24 @@ router.post('/', ensureAdmin, async function(req, res, next) {
 	}
 });
 
+/**POST /jobs/:id/apply
+ *
+ *  Takes JSON object {state: string-of-application-state}
+ *
+ * => {message: new-state}
+ */
+
+router.post('/:id/apply', authenticateJWT, async function(req, res, next) {
+	console.debug('Routes jobs POST /:id/apply - Start');
+
+	try {
+		const application = await Job.apply(req.user.username, req.params.id, req.body.state);
+		return res.status(201).json({ message: application.state });
+	} catch (e) {
+		return next(e);
+	}
+});
+
 /**GET /jobs:id
  *
  *  Finds a job by its id

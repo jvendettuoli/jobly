@@ -36,9 +36,9 @@ async function seed() {
 			`INSERT INTO applications
             (username, job_id, state)
             VALUES
-            ('Test User 1', 1, 'WA'),
-            ('Test User 1', 2, 'OR'),
-            ('Test User 2', 1, 'WA')`
+            ('Test User 1', 1, 'applied'),
+            ('Test User 1', 2, 'interested'),
+            ('Test User 2', 1, 'accepted')`
 		);
 	} catch (e) {
 		console.log(`Error: ${e}`);

@@ -72,7 +72,8 @@ class Job {
 		console.debug('Class Job find - Start');
 
 		const result = await db.query(
-			`SELECT id, title, salary, equity, date_posted, c.handle, c.name, c.num_employees, c.description, c.logo_url FROM jobs
+			`SELECT id, title, salary, equity, date_posted, c.handle, c.name, c.num_employees, c.description, c.logo_url 
+			FROM jobs
 			JOIN companies AS c ON jobs.company_handle = c.handle
                 WHERE id = $1`,
 			[ id ]
@@ -131,6 +132,25 @@ class Job {
 			job['company'] = company.rows[0];
 
 			return job;
+		} catch (e) {
+			return e;
+		}
+	}
+	/** Create an application for a job given a user and state */
+	static async apply(username, id, state) {
+		console.debug('Class Job apply - Start');
+		try {
+			const result = await db.query(
+				`INSERT INTO applications (username, job_id, state) 
+				VALUES ($1, $2, $3)
+				ON CONFLICT ON CONSTRAINT applications_pkey
+				DO
+				UPDATE SET username = $1, job_id = $2, state = $3
+				RETURNING state`,
+				[ username, id, state ]
+			);
+
+			return result.rows[0];
 		} catch (e) {
 			return e;
 		}
