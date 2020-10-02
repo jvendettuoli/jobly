@@ -96,7 +96,7 @@ class Company {
 			[ company.handle ]
 		);
 
-		company['jobs'] = jobsResults.rows.length === 0 ? [ 'No jobs available.' ] : jobsResults.rows[0];
+		company['jobs'] = jobsResults.rows.length === 0 ? [ 'No jobs available.' ] : jobsResults.rows;
 
 		return company;
 	}

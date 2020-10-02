@@ -4,7 +4,7 @@ const ExpressError = require('../helpers/expressError');
 const sqlForPartialUpdate = require('../helpers/partialUpdate');
 const bcrypt = require('bcrypt');
 
-const { BCRYPT_WORK_FACTOR } = require('../config/config');
+const { BCRYPT_WORK_FACTOR } = require('../config');
 
 /** User Class */
 
@@ -75,7 +75,6 @@ class User {
 			[ username ]
 		);
 
-		console.log('RESULT', result.rows);
 		// Throw error if username is not found
 		if (result.rows.length === 0) {
 			throw new ExpressError(`No User found with username ${username}`, 400);
@@ -120,7 +119,6 @@ class User {
 		try {
 			const result = await db.query(query, values);
 
-			console.log('RESULT', result.rows);
 			// Throw error if username is not found
 			if (result.rows.length === 0) {
 				throw new ExpressError(`No User found with username ${username}`, 400);

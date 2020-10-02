@@ -36,7 +36,6 @@ router.get('/', async function(req, res, next) {
 
 router.post('/', async function(req, res, next) {
 	console.debug('Routes users POST / - Start');
-	console.log('REQ.BODY', req.body);
 
 	try {
 		const validation = validate(req.body, userNewSchema);
@@ -45,7 +44,6 @@ router.post('/', async function(req, res, next) {
 			throw new ExpressError(validation.errors.map((e) => e.stack), 400);
 		}
 		const user = await User.register(req.body);
-		console.log('USER', user);
 		if (user instanceof ExpressError) {
 			return next(user);
 		}

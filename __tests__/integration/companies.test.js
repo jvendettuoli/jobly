@@ -2,102 +2,104 @@
 const request = require('supertest');
 
 process.env.NODE_ENV = 'test';
-const db = require('../../db');
 const app = require('../../app');
 
-// Global variables for testing
-let companyData = {
-	handle        : 'Test-Name',
-	name          : 'Test Name',
-	num_employees : 50,
-	description   : 'Test Description for Test Name',
-	logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png'
-};
+const { afterAllSetup, afterEachSetup, testData, beforeEachSetup } = require('./setup');
 
 beforeEach(async () => {
-	await db.query(
-		`INSERT INTO companies
-        (handle, name, num_employees, description, logo_url)
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING handle, name, num_employees, description, logo_url`,
-		[
-			companyData.handle,
-			companyData.name,
-			companyData.num_employees,
-			companyData.description,
-			companyData.logo_url
-		]
-	);
+	await beforeEachSetup(testData);
 });
 
 describe('GET /companies', async function() {
 	test('Get a list of all companies', async function() {
-		const response = await request(app).get('/companies');
+		const response = await request(app).get('/companies').send({ _token: testData.testUser.userToken });
 
 		expect(response.statusCode).toBe(200);
 		expect(response.body.companies).toEqual([
 			{
-				handle : companyData.handle,
-				name   : companyData.name
+				handle : testData.testCompany.handle,
+				name   : testData.testCompany.name
 			}
 		]);
 	});
 	test('Get a list of all companies with good search parameter', async function() {
-		const response = await request(app).get('/companies?search=Test');
+		const response = await request(app).get('/companies?search=Test').send({ _token: testData.testUser.userToken });
 
 		expect(response.statusCode).toBe(200);
 		expect(response.body.companies).toEqual([
 			{
-				handle : companyData.handle,
-				name   : companyData.name
+				handle : testData.testCompany.handle,
+				name   : testData.testCompany.name
 			}
 		]);
 	});
 	test('Return no companies with bad search parameter', async function() {
-		const response = await request(app).get('/companies?search=badsearch');
+		const response = await request(app)
+			.get('/companies?search=badsearch')
+			.send({ _token: testData.testUser.userToken });
 
 		expect(response.statusCode).toBe(200);
 		expect(response.body.companies).toEqual([]);
 	});
 	test('Get a list of all companies with good min employees parameter', async function() {
-		const response = await request(app).get('/companies?min_employees=10');
+		const response = await request(app)
+			.get('/companies?min_employees=10')
+			.send({ _token: testData.testUser.userToken });
 
 		expect(response.statusCode).toBe(200);
 		expect(response.body.companies).toEqual([
 			{
-				handle : companyData.handle,
-				name   : companyData.name
+				handle : testData.testCompany.handle,
+				name   : testData.testCompany.name
 			}
 		]);
 	});
 	test('Return no companies with bad min employees parameter', async function() {
-		const response = await request(app).get('/companies?min_employees=100');
+		const response = await request(app)
+			.get('/companies?min_employees=100')
+			.send({ _token: testData.testUser.userToken });
 
 		expect(response.statusCode).toBe(200);
 		expect(response.body.companies).toEqual([]);
 	});
 	test('Get a list of all companies with good max employees parameter', async function() {
-		const response = await request(app).get('/companies?max_employees=100');
+		const response = await request(app)
+			.get('/companies?max_employees=100')
+			.send({ _token: testData.testUser.userToken });
 
 		expect(response.statusCode).toBe(200);
 		expect(response.body.companies).toEqual([
 			{
-				handle : companyData.handle,
-				name   : companyData.name
+				handle : testData.testCompany.handle,
+				name   : testData.testCompany.name
 			}
 		]);
 	});
 	test('Return no companies with bad max employees parameter', async function() {
-		const response = await request(app).get('/companies?max_employees=10');
+		const response = await request(app)
+			.get('/companies?max_employees=10')
+			.send({ _token: testData.testUser.userToken });
 
 		expect(response.statusCode).toBe(200);
 		expect(response.body.companies).toEqual([]);
+	});
+	test('Return 401 for bad token', async function() {
+		const response = await request(app).get('/companies?max_employees=10').send({ _token: 'bad-token' });
+
+		expect(response.statusCode).toBe(401);
+	});
+	test('Return 401 for no token', async function() {
+		const response = await request(app).get('/companies?max_employees=10');
+
+		expect(response.statusCode).toBe(401);
 	});
 });
 
 describe('GET /companies/:handle', async function() {
 	test('Get a specific company by handle', async function() {
-		const response = await request(app).get(`/companies/${companyData.handle}`);
+		const response = await request(app)
+			.get(`/companies/${testData.testCompany.handle}`)
+			.send({ _token: testData.testUser.userToken });
 
 		expect(response.statusCode).toBe(200);
 		expect(response.body.company).toEqual({
@@ -106,14 +108,32 @@ describe('GET /companies/:handle', async function() {
 			num_employees : 50,
 			description   : 'Test Description for Test Name',
 			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png',
-			jobs          : [ 'No jobs available.' ]
+			jobs          : [
+				{
+					id          : testData.testJob.id,
+					title       : testData.testJob.title,
+					salary      : testData.testJob.salary,
+					equity      : testData.testJob.equity,
+					date_posted : expect.any(String)
+				}
+			]
 		});
 	});
 	test('Invalid handle returns 400', async function() {
-		const response = await request(app).get(`/companies/cacacachoo`);
+		const response = await request(app).get(`/companies/cacacachoo`).send({ _token: testData.testUser.userToken });
 
 		expect(response.statusCode).toBe(400);
 		expect(response.body.message).toEqual('No company found with handle cacacachoo');
+	});
+	test('Returns 401 for bad token', async function() {
+		const response = await request(app).get(`/companies/cacacachoo`).send({ _token: 'bad-token' });
+
+		expect(response.statusCode).toBe(401);
+	});
+	test('Returns 401 for no token', async function() {
+		const response = await request(app).get(`/companies/cacacachoo`);
+
+		expect(response.statusCode).toBe(401);
 	});
 });
 
@@ -123,7 +143,8 @@ describe('POST /companies/', async function() {
 			name          : 'Test Name2',
 			num_employees : 502,
 			description   : 'Test Description for Test Name2',
-			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png'
+			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png',
+			_token        : testData.testAdmin.userToken
 		});
 
 		expect(response.statusCode).toBe(201);
@@ -140,7 +161,8 @@ describe('POST /companies/', async function() {
 			name          : 'Test Name',
 			num_employees : 502,
 			description   : 'Test Description for Test Name2',
-			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png'
+			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png',
+			_token        : testData.testAdmin.userToken
 		});
 
 		expect(response.statusCode).toBe(400);
@@ -150,20 +172,54 @@ describe('POST /companies/', async function() {
 		const response = await request(app).post(`/companies/`).send({
 			num_employees : 502,
 			description   : 'Test Description for Test Name2',
-			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png'
+			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png',
+			_token        : testData.testAdmin.userToken
 		});
 
 		expect(response.statusCode).toBe(400);
+	});
+	test('Returns 401 for lack of admin authorization', async function() {
+		const response = await request(app).post(`/companies/`).send({
+			name          : 'Test Name2',
+			num_employees : 502,
+			description   : 'Test Description for Test Name2',
+			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png',
+			_token        : testData.testUser.userToken
+		});
+
+		expect(response.statusCode).toBe(401);
+	});
+	test('Returns 401 for bad token', async function() {
+		const response = await request(app).post(`/companies/`).send({
+			name          : 'Test Name2',
+			num_employees : 502,
+			description   : 'Test Description for Test Name2',
+			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png',
+			_token        : 'bad-token'
+		});
+
+		expect(response.statusCode).toBe(401);
+	});
+	test('Returns 401 for no token', async function() {
+		const response = await request(app).post(`/companies/`).send({
+			name          : 'Test Name2',
+			num_employees : 502,
+			description   : 'Test Description for Test Name2',
+			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png'
+		});
+
+		expect(response.statusCode).toBe(401);
 	});
 });
 
 describe('PATCH /companies/', async function() {
 	test('Patch an existing company', async function() {
-		const response = await request(app).patch(`/companies/${companyData.handle}`).send({
+		const response = await request(app).patch(`/companies/${testData.testCompany.handle}`).send({
 			name          : 'Test Name2',
 			num_employees : 502,
 			description   : 'Test Description for Test Name2',
-			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png'
+			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png',
+			_token        : testData.testAdmin.userToken
 		});
 
 		expect(response.statusCode).toBe(200);
@@ -180,39 +236,98 @@ describe('PATCH /companies/', async function() {
 			name          : 'Test Name',
 			num_employees : 502,
 			description   : 'Test Description for Test Name2',
-			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png'
+			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png',
+			_token        : testData.testAdmin.userToken
 		});
 
 		expect(response.statusCode).toBe(400);
 		expect(response.body.message).toEqual('No company found with handle kaboom');
 	});
 	test('Returns 400 for invalid patch data', async function() {
-		const response = await request(app).patch(`/companies/${companyData.handle}`).send({
-			num_employees : -1
+		const response = await request(app).patch(`/companies/${testData.testCompany.handle}`).send({
+			num_employees : -1,
+			_token        : testData.testAdmin.userToken
 		});
 
 		expect(response.statusCode).toBe(400);
+	});
+	test('Returns 401 for lack of admin authorization', async function() {
+		const response = await request(app).patch(`/companies/${testData.testCompany.handle}`).send({
+			name          : 'Test Name2',
+			num_employees : 502,
+			description   : 'Test Description for Test Name2',
+			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png',
+			_token        : testData.testUser.userToken
+		});
+
+		expect(response.statusCode).toBe(401);
+	});
+
+	test('Returns 401 for bad token', async function() {
+		const response = await request(app).patch(`/companies/${testData.testCompany.handle}`).send({
+			name          : 'Test Name2',
+			num_employees : 502,
+			description   : 'Test Description for Test Name2',
+			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png',
+			_token        : 'bad-token'
+		});
+
+		expect(response.statusCode).toBe(401);
+	});
+
+	test('Returns 401 for no token', async function() {
+		const response = await request(app).patch(`/companies/${testData.testCompany.handle}`).send({
+			name          : 'Test Name2',
+			num_employees : 502,
+			description   : 'Test Description for Test Name2',
+			logo_url      : 'https://www.freelogodesign.org/Content/img/logo-samples/barbara.png'
+		});
+
+		expect(response.statusCode).toBe(401);
 	});
 });
 
 describe('DELETE /companies/', async function() {
 	test('Delete a company', async function() {
-		const response = await request(app).delete(`/companies/${companyData.handle}`);
+		const response = await request(app).delete(`/companies/${testData.testCompany.handle}`).send({
+			_token : testData.testAdmin.userToken
+		});
 
 		expect(response.statusCode).toBe(200);
 		expect(response.body.message).toEqual('Company deleted');
 	});
 	test('Returns 400 for invalid company handle', async function() {
-		const response = await request(app).delete(`/companies/kaboom`);
+		const response = await request(app).delete(`/companies/kaboom`).send({
+			_token : testData.testAdmin.userToken
+		});
 
 		expect(response.statusCode).toBe(400);
 		expect(response.body.message).toEqual('No company found with handle kaboom');
 	});
+	test('Returns 401 for lack of admin authorization', async function() {
+		const response = await request(app).delete(`/companies/${testData.testCompany.handle}`).send({
+			_token : testData.testUser.userToken
+		});
+
+		expect(response.statusCode).toBe(401);
+	});
+	test('Returns 401 for bad token', async function() {
+		const response = await request(app).delete(`/companies/${testData.testCompany.handle}`).send({
+			_token : 'bad-token'
+		});
+
+		expect(response.statusCode).toBe(401);
+	});
+	test('Returns 401 for no token', async function() {
+		const response = await request(app).delete(`/companies/${testData.testCompany.handle}`);
+
+		expect(response.statusCode).toBe(401);
+	});
 });
 
 afterEach(async function() {
-	await db.query('DELETE FROM companies');
+	await afterEachSetup();
 });
 afterAll(async function() {
-	await db.end();
+	await afterAllSetup();
 });

@@ -1,7 +1,7 @@
 /**Middleware for user authentication and authorization */
 
 const jwt = require('jsonwebtoken');
-const { SECRET_KEY } = require('../config/config');
+const { SECRET_KEY } = require('../config');
 const ExpressError = require('../helpers/expressError');
 
 /**Authenticate user JWT  
@@ -32,10 +32,10 @@ function ensureAdmin(req, res, next) {
 			return next();
 		}
 		else {
-			throw new ExpressError('This route requires admin acess', 401);
+			throw new ExpressError('This route requires admin access', 401);
 		}
 	} catch (e) {
-		return next(new ExpressError('This route requires admin acess', 401));
+		return next(new ExpressError('This route requires admin access', 401));
 	}
 }
 /**Ensures user is accessing correct user data */
@@ -50,10 +50,10 @@ function ensureCorrectUser(req, res, next) {
 			return next();
 		}
 		else {
-			return next({ status: 401, message: 'Unauthorized' });
+			return next({ status: 401, message: 'Unauthorized - Must be same user' });
 		}
 	} catch (e) {
-		return next({ status: 401, message: 'Unauthorized' });
+		return next({ status: 401, message: 'Unauthorized - Must be same user' });
 	}
 }
 

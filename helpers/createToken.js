@@ -1,7 +1,7 @@
 /** Middleware for handling req authorization for routes. */
 
 const jwt = require('jsonwebtoken');
-const { SECRET_KEY } = require('../config/config');
+const { SECRET_KEY } = require('../config');
 
 /**Accepts user data and returns a signed JWT 
  * => {token: {username, is_admin, iat}}
