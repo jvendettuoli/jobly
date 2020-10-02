@@ -33,3 +33,12 @@ CREATE TABLE users
     photo_url TEXT,
     is_admin BOOLEAN NOT NULL DEFAULT false
 );
+
+CREATE TABLE applications
+(
+    username TEXT REFERENCES users ON DELETE CASCADE,
+    job_id INTEGER REFERENCES jobs ON DELETE CASCADE,
+    state TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(username, job_id)
+);
