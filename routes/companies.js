@@ -5,6 +5,7 @@ const { validate } = require('jsonschema');
 const Company = require('../models/company');
 const ExpressError = require('../helpers/expressError');
 const { companyNewSchema, companyUpdateSchema } = require('../schemas');
+const { authenticateJWT, ensureAdmin } = require('../middleware/auth');
 
 const router = new express.Router();
 
@@ -16,7 +17,7 @@ const router = new express.Router();
  * => {companies: [{handle, name},...]}
  */
 
-router.get('/', async function(req, res, next) {
+router.get('/', authenticateJWT, async function(req, res, next) {
 	console.debug('Routes companies GET / - Start');
 
 	try {
@@ -34,7 +35,7 @@ router.get('/', async function(req, res, next) {
  * => {company: {handle, name, num_employees, description, logo_url}
  */
 
-router.post('/', async function(req, res, next) {
+router.post('/', ensureAdmin, async function(req, res, next) {
 	console.debug('Routes companies POST / - Start');
 
 	try {
@@ -59,7 +60,7 @@ router.post('/', async function(req, res, next) {
  * => {company: {handle, name, num_employees, description, logo_url}
  */
 
-router.get('/:handle', async function(req, res, next) {
+router.get('/:handle', authenticateJWT, async function(req, res, next) {
 	console.debug('Routes companies GET /:handle - Start');
 
 	try {
@@ -82,7 +83,7 @@ router.get('/:handle', async function(req, res, next) {
  * => {company: {handle, name, num_employees, description, logo_url}
  */
 
-router.patch('/:handle', async function(req, res, next) {
+router.patch('/:handle', ensureAdmin, async function(req, res, next) {
 	console.debug('Routes companies GET /:handle - Start');
 
 	try {
@@ -108,7 +109,7 @@ router.patch('/:handle', async function(req, res, next) {
  * => {message: Company delete}
  */
 
-router.delete('/:handle', async function(req, res, next) {
+router.delete('/:handle', ensureAdmin, async function(req, res, next) {
 	console.debug('Routes companies DELETE /:handle - Start');
 
 	try {

@@ -5,6 +5,7 @@ const { validate } = require('jsonschema');
 const Job = require('../models/job');
 const ExpressError = require('../helpers/expressError');
 const { jobNewSchema, jobUpdateSchema } = require('../schemas');
+const { authenticateJWT, ensureAdmin } = require('../middleware/auth');
 
 const router = new express.Router();
 
@@ -16,7 +17,7 @@ const router = new express.Router();
  * => {jobs: [{title, company_handle},...]}
  */
 
-router.get('/', async function(req, res, next) {
+router.get('/', authenticateJWT, async function(req, res, next) {
 	console.debug('Routes jobs GET / - Start');
 
 	try {
@@ -34,7 +35,7 @@ router.get('/', async function(req, res, next) {
  * => {job: {id,title, salary, equity, company_handle, date_posted}}
  */
 
-router.post('/', async function(req, res, next) {
+router.post('/', ensureAdmin, async function(req, res, next) {
 	console.debug('Routes jobs POST / - Start');
 
 	try {
@@ -56,7 +57,7 @@ router.post('/', async function(req, res, next) {
  * => {job: {id, title, salary, equity, date_posted, company:{companyData}}}
  */
 
-router.get('/:id', async function(req, res, next) {
+router.get('/:id', authenticateJWT, async function(req, res, next) {
 	console.debug('Routes jobs GET /:id - Start');
 
 	try {
@@ -82,7 +83,7 @@ router.get('/:id', async function(req, res, next) {
  * => {job:{id, title, salary, equity, date_posted, company:{companyData}}}
  */
 
-router.patch('/:id', async function(req, res, next) {
+router.patch('/:id', ensureAdmin, async function(req, res, next) {
 	console.debug('Routes jobs GET /:id - Start');
 
 	try {
@@ -111,7 +112,7 @@ router.patch('/:id', async function(req, res, next) {
  * => {message: job delete}
  */
 
-router.delete('/:id', async function(req, res, next) {
+router.delete('/:id', ensureAdmin, async function(req, res, next) {
 	console.debug('Routes jobs DELETE /:id - Start');
 
 	try {

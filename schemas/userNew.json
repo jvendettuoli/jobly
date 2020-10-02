@@ -12,10 +12,11 @@
 			"first_name": "Justin",
 			"last_name": "Vendettuoli",
 			"email": "jendettul@gmail.com",
+			"photo_url": "https://www.flaticon.com/svg/static/icons/svg/21/21104.svg",
 			"is_admin": true
 		}
 	],
-	"required": [ "username", "password", "first_name", "last_name", "email", "photo_url", "is_admin" ],
+	"required": [ "username", "password", "first_name", "last_name", "email", "is_admin" ],
 	"properties": {
 		"username": {
 			"$id": "#/properties/username",
