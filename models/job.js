@@ -136,7 +136,9 @@ class Job {
 			return e;
 		}
 	}
-	/** Create an application for a job given a user and state */
+	/** Create an application for a job given a user and state
+	 * If application already exists it updates it instead.
+	 */
 	static async apply(username, id, state) {
 		console.debug('Class Job apply - Start');
 		try {

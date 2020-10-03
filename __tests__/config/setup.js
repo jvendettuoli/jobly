@@ -43,7 +43,8 @@ let testData = {
 		salary         : 80000,
 		equity         : 0.25,
 		company_handle : 'Test-Name'
-	}
+	},
+	testApp     : {}
 };
 
 /**Before Each functions to run before each test create new
@@ -115,7 +116,7 @@ async function beforeEachSetup(testData) {
 		);
 
 		//Create Job
-		let result = await db.query(
+		let jobResult = await db.query(
 			`INSERT INTO jobs
             (title, salary, equity, company_handle)
             VALUES ($1, $2, $3, $4)
@@ -127,7 +128,18 @@ async function beforeEachSetup(testData) {
 				testData.testJob.company_handle
 			]
 		);
-		testData.testJob = result.rows[0];
+		testData.testJob = jobResult.rows[0];
+
+		//Create Application
+		let appResult = await db.query(
+			`INSERT INTO applications
+            (username, job_id, state)
+            VALUES
+			($1, $2, $3)
+			RETURNING *`,
+			[ testData.testUser.username, testData.testJob.id, 'applied' ]
+		);
+		testData.testApp = appResult.rows;
 	} catch (e) {
 		console.debug('Error setting up testData: ', e);
 	}

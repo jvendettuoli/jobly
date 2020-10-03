@@ -1,7 +1,8 @@
-
+DROP TYPE IF EXISTS state;
 DROP TABLE IF EXISTS
-companies, users, jobs, applications
+companies, users, jobs, applications, technologies
 CASCADE;
+
 
 
 CREATE TABLE companies
@@ -21,6 +22,7 @@ CREATE TABLE jobs
     equity FLOAT NOT NULL CHECK (equity <= 1.0),
     company_handle TEXT NOT NULL REFERENCES companies ON DELETE CASCADE,
     date_posted TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    -- technology TEXT REFERENCES technologies
 );
 
 CREATE TABLE users
@@ -32,13 +34,25 @@ CREATE TABLE users
     email TEXT UNIQUE NOT NULL,
     photo_url TEXT,
     is_admin BOOLEAN NOT NULL DEFAULT false
+    -- technology TEXT REFERENCES technologies
 );
+
+CREATE TYPE state AS ENUM
+('interested', 'applied', 'accepted', 'rejected');
 
 CREATE TABLE applications
 (
     username TEXT REFERENCES users ON DELETE CASCADE,
     job_id INTEGER REFERENCES jobs ON DELETE CASCADE,
-    state TEXT NOT NULL,
+    state state,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY(username, job_id)
 );
+
+-- CREATE TABLE technologies
+-- (
+--     technology TEXT PRIMARY KEY,
+--     job_id INTEGER REFERENCES jobs ON DELETE CASCADE,
+--     username TEXT REFERENCES users ON DELETE CASCADE
+
+-- );

@@ -4,7 +4,7 @@ const request = require('supertest');
 process.env.NODE_ENV = 'test';
 const app = require('../../app');
 
-const { afterAllSetup, afterEachSetup, testData, beforeEachSetup } = require('./setup');
+const { afterAllSetup, afterEachSetup, testData, beforeEachSetup } = require('../config/setup');
 
 beforeEach(async () => {
 	await beforeEachSetup(testData);

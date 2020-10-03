@@ -3,6 +3,9 @@
 	"version": "1.0.0",
 	"description": "",
 	"main": "app.js",
+	"jest": {
+		"testPathIgnorePatterns": [ "<rootDir>/__tests__/config" ]
+	},
 	"scripts": {
 		"test": "jest",
 		"start": "nodemon server.js"

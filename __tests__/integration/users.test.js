@@ -5,7 +5,7 @@ process.env.NODE_ENV = 'test';
 const app = require('../../app');
 const User = require('../../models/user');
 
-const { afterAllSetup, afterEachSetup, testData, beforeEachSetup } = require('./setup');
+const { afterAllSetup, afterEachSetup, testData, beforeEachSetup } = require('../config/setup');
 
 beforeEach(async () => {
 	await beforeEachSetup(testData);
@@ -45,7 +45,14 @@ describe('GET /users/:username', async function() {
 			first_name : testData.testUser.first_name,
 			last_name  : testData.testUser.last_name,
 			email      : testData.testUser.email,
-			photo_url  : testData.testUser.photo_url
+			photo_url  : testData.testUser.photo_url,
+			jobs       : [
+				{
+					created_at : expect.any(String),
+					id         : expect.any(Number),
+					state      : 'applied'
+				}
+			]
 		});
 		expect(response.body.user).not.toHaveProperty('password');
 	});
@@ -77,7 +84,8 @@ describe('POST /users/', async function() {
 			first_name : 'Rob',
 			last_name  : 'Rugged',
 			email      : 'ruggy@gmail.com',
-			photo_url  : 'https://www.flaticon.com/svg/static/icons/svg/21/21104.svg'
+			photo_url  : 'https://www.flaticon.com/svg/static/icons/svg/21/21104.svg',
+			jobs       : [ 'No applications' ]
 		});
 	});
 	test('Returns 400 for existing username', async function() {

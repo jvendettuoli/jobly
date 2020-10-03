@@ -51,7 +51,7 @@ router.post('/', ensureAdmin, async function(req, res, next) {
 });
 
 /**POST /jobs/:id/apply
- *
+ *	Creates or updates an application
  *  Takes JSON object {state: string-of-application-state}
  *
  * => {message: new-state}
